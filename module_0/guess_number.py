@@ -57,7 +57,7 @@ def game_core_v3(number):
         elif predict > number:
             predict -= suggested_diff                   # уменьшаем предпологаемое число на уменьшенный вдвое шаг
         if suggested_diff > 1:
-            suggested_difference = suggested_diff // 2  # уменьшаем шаг вдвое если шаг > 1
+            suggested_diff = suggested_diff // 2  # уменьшаем шаг вдвое если шаг > 1
 
     # выход из цикла, если угадали
     return count
