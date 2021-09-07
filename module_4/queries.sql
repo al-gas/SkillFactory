@@ -27,13 +27,59 @@ ON dst_project.aircrafts.aircraft_code = dst_project.seats.aircraft_code
 WHERE dst_project.aircrafts.model = 'Boeing 777-300';
  
 -- Вопрос 4. Сколько состоявшихся (фактических) рейсов было совершено между 1 апреля 2017 года и 1 сентября 2017 года?
-SELECT *, (actual_arrival - actual_departure) AS duration
+SELECT count(distinct flight_id)
 FROM dst_project.flights
-WHERE (date_trunc('month', scheduled_departure) IN ('2017-04-01','2017-05-01', '2017-06-01', '2017-07-01', '2017-08-01', '2017-09-01'))
-  AND status NOT IN ('Cancelled')
-  AND dst_project.flights.departure_airport IS NOT NULL;
+WHERE actual_arrival BETWEEN '2017-04-01' and '2017-09-01'
+  AND status = 'Arrived'
+  AND arrival_airport IS NOT NULL;
 
-select distinct status from dst_project.flights;
+
+--Задание 4.3
+--Вопрос 1. Сколько всего рейсов было отменено по данным базы?
+SELECT count(distinct flight_id)
+FROM dst_project.flights
+WHERE status = 'Cancelled'
+
+
+--Вопрос 2. Сколько самолетов моделей типа Boeing, Sukhoi Superjet, Airbus находится в базе авиаперевозок?
+--Boeing:
+SELECT count(distinct dst_project.flights.flight_no)
+FROM dst_project.flights
+INNER JOIN dst_project.aircrafts ON dst_project.flights.aircraft_code = dst_project.aircrafts.aircraft_code
+WHERE dst_project.aircrafts.model LIKE 'Boeing%';
+
+--Sukhoi Superjet:
+SELECT count(distinct dst_project.flights.flight_no)
+FROM dst_project.flights
+INNER JOIN dst_project.aircrafts ON dst_project.flights.aircraft_code = dst_project.aircrafts.aircraft_code
+WHERE dst_project.aircrafts.model LIKE 'Sukhoi Superjet%';
+
+--Airbus:
+SELECT count(distinct dst_project.flights.flight_no)
+FROM dst_project.flights
+INNER JOIN dst_project.aircrafts ON dst_project.flights.aircraft_code = dst_project.aircrafts.aircraft_code
+WHERE dst_project.aircrafts.model LIKE 'Airbus%';
+
+--Вопрос 3. В какой части (частях) света находится больше аэропортов?
+SELECT
+    count(CASE WHEN dst_project.airports.timezone like 'Asia%' THEN dst_project.airports.timezone END) as Asia,
+    count(CASE WHEN dst_project.airports.timezone like 'Europe%' THEN dst_project.airports.timezone END) as Europe,
+    count(CASE WHEN dst_project.airports.timezone like 'Australia%' THEN dst_project.airports.timezone END) as Australia
+FROM dst_project.airports
+
+--Вопрос 4. У какого рейса была самая большая задержка прибытия за все время сбора данных? Введите id рейса (flight_id).
+select a.flight_id
+from (
+    select flight_id, (actual_arrival - actual_departure) as duration
+    from dst_project.flights
+) a
+where a.duration = max(a.duration)
+
+
+
+select * from aircrafts
+
+select flight_no, count(distinct dst_project.flights.aircraft_code) from dst_project.flights group by flight_no;
 select * from dst_project.seats;
 
 select a.model
@@ -45,6 +91,8 @@ from dst_project.flights
 where (date_part('year', actual_departure) = 2016) and
 (date_part('month', actual_departure) in (8))
 
+
+-- What was given
 select *, (actual_arrival - actual_departure) as duration
 from dst_project.flights
 where departure_airport = 'AAQ'
@@ -53,7 +101,7 @@ where departure_airport = 'AAQ'
 
 
 
-
+-- finall query for the resulting dataset
 WITH flight AS (
     SELECT *
     FROM dst_project.flights f
