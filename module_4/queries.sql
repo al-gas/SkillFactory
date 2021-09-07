@@ -139,3 +139,5 @@ WITH flight AS (
     where departure_airport = 'AAQ'
       and (date_trunc('month', scheduled_departure) in ('2017-01-01','2017-02-01', '2017-12-01'))
       and status not in ('Cancelled');
+
+
