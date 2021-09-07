@@ -6,6 +6,7 @@ FROM dst_project.airports
 GROUP BY city
 HAVING count(airport_name)>1
 ORDER BY city ASC;
+--=========================================
 
 -- Задание 4.2
 -- Вопрос 1. Таблица рейсов содержит всю информацию о прошлых, текущих и запланированных рейсах.
@@ -32,7 +33,7 @@ FROM dst_project.flights
 WHERE actual_arrival BETWEEN '2017-04-01' and '2017-09-01'
   AND status = 'Arrived'
   AND arrival_airport IS NOT NULL;
-
+--=========================================
 
 --Задание 4.3
 --Вопрос 1. Сколько всего рейсов было отменено по данным базы?
@@ -43,22 +44,31 @@ WHERE status = 'Cancelled'
 
 --Вопрос 2. Сколько самолетов моделей типа Boeing, Sukhoi Superjet, Airbus находится в базе авиаперевозок?
 --Boeing:
-SELECT count(distinct dst_project.flights.flight_no)
-FROM dst_project.flights
-INNER JOIN dst_project.aircrafts ON dst_project.flights.aircraft_code = dst_project.aircrafts.aircraft_code
-WHERE dst_project.aircrafts.model LIKE 'Boeing%';
+--SELECT count(distinct dst_project.flights.flight_no)
+--FROM dst_project.flights
+--RIGHT JOIN dst_project.aircrafts ON dst_project.flights.aircraft_code = dst_project.aircrafts.aircraft_code
+--WHERE dst_project.aircrafts.model LIKE 'Boeing%';
+SELECT count(a.model)
+FROM dst_project.aircrafts a
+WHERE a.model LIKE 'Boeing%';
 
 --Sukhoi Superjet:
-SELECT count(distinct dst_project.flights.flight_no)
-FROM dst_project.flights
-INNER JOIN dst_project.aircrafts ON dst_project.flights.aircraft_code = dst_project.aircrafts.aircraft_code
-WHERE dst_project.aircrafts.model LIKE 'Sukhoi Superjet%';
+--SELECT count(distinct dst_project.flights.flight_no)
+--FROM dst_project.flights
+--INNER JOIN dst_project.aircrafts ON dst_project.flights.aircraft_code = dst_project.aircrafts.aircraft_code
+--WHERE dst_project.aircrafts.model LIKE 'Sukhoi Superjet%';
+SELECT count(a.model)
+FROM dst_project.aircrafts a
+WHERE a.model LIKE 'Sukhoi Superjet%';
 
 --Airbus:
-SELECT count(distinct dst_project.flights.flight_no)
-FROM dst_project.flights
-INNER JOIN dst_project.aircrafts ON dst_project.flights.aircraft_code = dst_project.aircrafts.aircraft_code
-WHERE dst_project.aircrafts.model LIKE 'Airbus%';
+--SELECT count(distinct dst_project.flights.flight_no)
+--FROM dst_project.flights
+--INNER JOIN dst_project.aircrafts ON dst_project.flights.aircraft_code = dst_project.aircrafts.aircraft_code
+--WHERE dst_project.aircrafts.model LIKE 'Airbus%';
+SELECT count(a.model)
+FROM dst_project.aircrafts a
+WHERE a.model LIKE 'Airbus%';
 
 --Вопрос 3. В какой части (частях) света находится больше аэропортов?
 SELECT
@@ -68,13 +78,36 @@ SELECT
 FROM dst_project.airports
 
 --Вопрос 4. У какого рейса была самая большая задержка прибытия за все время сбора данных? Введите id рейса (flight_id).
-select a.flight_id
-from (
-    select flight_id, (actual_arrival - actual_departure) as duration
-    from dst_project.flights
-) a
-where a.duration = max(a.duration)
+SELECT f.flight_id, (f.actual_arrival - f.scheduled_arrival) as delay
+FROM dst_project.flights f
+WHERE f.actual_arrival IS NOT NULL
+ORDER BY delay DESC
+LIMIT 1
+--=========================================
 
+--Задание 4.4
+--Вопрос 1. Когда был запланирован самый первый вылет, сохраненный в базе данных?
+SELECT * FROM dst_project.flights f
+ORDER BY f.scheduled_departure ASC
+LIMIT 10
+
+--Вопрос 2. Сколько минут составляет запланированное время полета в самом длительном рейсе?
+
+
+--Вопрос 3. Между какими аэропортами пролегает самый длительный по времени запланированный рейс?
+
+
+--Вопрос 4. Сколько составляет средняя дальность полета среди всех самолетов в минутах? Секунды округляются в меньшую сторону (отбрасываются до минут).
+
+--=========================================
+--Задание 4.5
+--Вопрос 1. Мест какого класса у SU9 больше всего?
+
+
+--Вопрос 2. Какую самую минимальную стоимость составило бронирование за всю историю?
+
+
+--Вопрос 3. Какой номер места был у пассажира с id = 4313 788533?
 
 
 select * from aircrafts
