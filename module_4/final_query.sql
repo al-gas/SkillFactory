@@ -19,7 +19,7 @@ WITH flight AS (
         FROM dst_project.ticket_flights
         GROUP BY 1
     ),
-    ticket_class AS (
+    fare AS (
         SELECT tf.flight_id,
                count(CASE WHEN tf.fare_conditions = 'Economy' THEN tf.fare_conditions END) as fare_economy,
                count(CASE WHEN tf.fare_conditions = 'Comfort' THEN tf.fare_conditions END) as fare_comfort,
@@ -52,7 +52,7 @@ SELECT f.flight_id,
        t.total_amount
 FROM flight f
     JOIN ticket t ON t.flight_id = f.flight_id
-    JOIN ticket_class tc ON tc.flight_id = f.flight_id
+    JOIN fare tc ON tc.flight_id = f.flight_id
     inner JOIN carrier_capacity cc ON cc.aircraft_code = f.aircraft_code
 WHERE departure_airport = 'AAQ'
   AND (date_trunc('month', scheduled_departure) IN ('2017-01-01','2017-02-01', '2017-12-01'))
