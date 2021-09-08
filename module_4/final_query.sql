@@ -47,14 +47,15 @@ SELECT f.flight_id,
        tc.fare_economy fare_economy,
        tc.fare_comfort fare_comfort,
        tc.fare_business fare_business,
+       (fare_economy + fare_comfort + fare_business) as total_sold,
        cc.plane_capacity,
        date_part('hour', f.actual_arrival - f.actual_departure) * 60 +
        date_part('minute', f.actual_arrival - f.actual_departure) flight_duration,
        t.total_amount
 FROM flight f
-    JOIN ticket t ON t.flight_id = f.flight_id
-    JOIN fare tc ON tc.flight_id = f.flight_id
-    JOIN dst_project.airports ap ON ap.airport_code = f.arrival_airport
+    RIGHT JOIN ticket t ON t.flight_id = f.flight_id
+    RIGHT JOIN fare tc ON tc.flight_id = f.flight_id
+    RIGHT JOIN dst_project.airports ap ON ap.airport_code = f.arrival_airport
     inner JOIN carrier_capacity cc ON cc.aircraft_code = f.aircraft_code
 WHERE departure_airport = 'AAQ'
   AND (date_trunc('month', scheduled_departure) IN ('2017-01-01','2017-02-01', '2017-12-01'))
@@ -72,3 +73,34 @@ FROM dst_project.seats s
 JOIN dst_project.aircrafts a ON s.aircraft_code = a.aircraft_code
 GROUP BY s.aircraft_code, a.model, a.range
 ORDER BY seat_count
+
+
+--Данные по рейсам Анапа-Новокузнецк
+SELECT *, sum(tf.amount) total_amount
+FROM dst_project.flights f
+LEFT JOIN dst_project.ticket_flights tf on f.flight_id=tf.flight_id
+WHERE f.departure_airport = 'AAQ'
+  AND (date_trunc('month', f.scheduled_departure) in ('2017-01-01',
+                                                      '2017-02-01',
+                                                      '2017-03-01',
+                                                      '2017-04-01',
+                                                      '2017-05-01',
+                                                      '2017-06-01',
+                                                      '2017-07-01',
+                                                      '2017-08-01',
+                                                      '2017-09-01'))
+  AND f.status not in ('Cancelled')
+  AND f.arrival_airport = 'NOZ'
+GROUP BY f.flight_id, tf.flight_id, tf.ticket_no
+
+
+select f.*, sum(tf.amount) as total_amount, count(tf.ticket_no) as sold_tickets
+from dst_project.ticket_flights tf
+right join dst_project.flights f on f.flight_id=tf.flight_id
+where f.departure_airport = 'AAQ'
+and (date_trunc('month', f.scheduled_departure) in ('2017-01-01', '2017-02-01', '2017-12-01'))
+group by tf.flight_id, f.flight_id
+order by f.actual_departure
+
+
+
