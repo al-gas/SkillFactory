@@ -3,9 +3,9 @@ WITH flight AS (
     SELECT f.flight_id,
            f.flight_no,
            f.aircraft_code,
+           a.model,
            f.departure_airport,
            f.arrival_airport,
-           a.model,
            f.scheduled_arrival,
            f.actual_arrival,
            f.actual_departure,
@@ -38,8 +38,9 @@ WITH flight AS (
     )
 SELECT f.flight_id,
        f.flight_no,
-       f.departure_airport,
        f.arrival_airport,
+       ap.longitude,
+       ap.latitude,
        f.model,
        f.actual_arrival,
        f.actual_departure,
@@ -53,7 +54,21 @@ SELECT f.flight_id,
 FROM flight f
     JOIN ticket t ON t.flight_id = f.flight_id
     JOIN fare tc ON tc.flight_id = f.flight_id
+    JOIN dst_project.airports ap ON ap.airport_code = f.arrival_airport
     inner JOIN carrier_capacity cc ON cc.aircraft_code = f.aircraft_code
 WHERE departure_airport = 'AAQ'
   AND (date_trunc('month', scheduled_departure) IN ('2017-01-01','2017-02-01', '2017-12-01'))
-  AND status NOT IN ('Cancelled');
+  AND status NOT IN ('Cancelled')
+ORDER BY f.actual_departure ASC;
+
+--Таблица с характеристиками самолётов
+--для сравнения по дальности полёта и вместительности
+--Будет использоваться для анализа данных и возможных предложениях
+SELECT s.aircraft_code,
+       a.model,
+       a.range,
+       count(s.seat_no) AS seat_count
+FROM dst_project.seats s
+JOIN dst_project.aircrafts a ON s.aircraft_code = a.aircraft_code
+GROUP BY s.aircraft_code, a.model, a.range
+ORDER BY seat_count

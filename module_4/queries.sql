@@ -176,7 +176,3 @@ FROM dst_project.aircrafts a
 WHERE departure_airport='AAQ'
 GROUP BY a.model
 ORDER BY seats DESC
-
-select s.aircraft_code, count(s.seat_no)
-from dst_project.seats s
-group by s.aircraft_code
